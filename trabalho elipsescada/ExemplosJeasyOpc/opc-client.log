@@ -1,0 +1,20 @@
+28.09.2014 21:59:28 INFO Thread-0 javafish.clients.opc.JEasyOpc - The OPC Client is connected.
+28.09.2014 21:59:28 INFO Thread-0 javafish.clients.opc.JEasyOpc - OPC Groups are registered.
+28.09.2014 21:59:28 INFO Thread-0 javafish.clients.opc.JEasyOpc - Asynchronous mode 2.0 is started.
+28.09.2014 21:59:55 INFO Thread-0 javafish.clients.opc.JEasyOpc - OPC Groups are unregistered successfully.
+28.09.2014 21:59:55 INFO Thread-0 javafish.clients.opc.JEasyOpc - The OPC Client is disconnected.
+29.09.2014 19:43:03 INFO Thread-0 javafish.clients.opc.JEasyOpc - The OPC Client is connected.
+29.09.2014 19:43:03 INFO Thread-0 javafish.clients.opc.JEasyOpc - OPC Groups are registered.
+29.09.2014 19:43:03 INFO Thread-0 javafish.clients.opc.JEasyOpc - Asynchronous mode 2.0 is started.
+29.09.2014 19:43:30 INFO Thread-0 javafish.clients.opc.JEasyOpc - OPC Groups are unregistered successfully.
+29.09.2014 19:43:30 INFO Thread-0 javafish.clients.opc.JEasyOpc - The OPC Client is disconnected.
+07.10.2015 07:53:31 INFO Thread-0 javafish.clients.opc.JEasyOpc - The OPC Client is connected.
+07.10.2015 07:53:31 INFO Thread-0 javafish.clients.opc.JEasyOpc - OPC Groups are registered.
+07.10.2015 07:53:31 INFO Thread-0 javafish.clients.opc.JEasyOpc - Asynchronous mode 2.0 is started.
+07.10.2015 07:53:58 INFO Thread-0 javafish.clients.opc.JEasyOpc - OPC Groups are unregistered successfully.
+07.10.2015 07:53:58 INFO Thread-0 javafish.clients.opc.JEasyOpc - The OPC Client is disconnected.
+07.10.2015 07:54:22 INFO Thread-0 javafish.clients.opc.JEasyOpc - The OPC Client is connected.
+07.10.2015 07:54:22 INFO Thread-0 javafish.clients.opc.JEasyOpc - OPC Groups are registered.
+07.10.2015 07:54:22 INFO Thread-0 javafish.clients.opc.JEasyOpc - Asynchronous mode 2.0 is started.
+07.10.2015 07:54:49 INFO Thread-0 javafish.clients.opc.JEasyOpc - OPC Groups are unregistered successfully.
+07.10.2015 07:54:49 INFO Thread-0 javafish.clients.opc.JEasyOpc - The OPC Client is disconnected.
