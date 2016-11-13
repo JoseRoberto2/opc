@@ -145,24 +145,26 @@ public class OPCRead extends javax.swing.JFrame {
         //SP = Double.parseDouble(resposta.getItems().get(0).getValue().toString());
         //PV = Double.parseDouble(resposta.getItems().get(1).getValue().toString());
         //MV = Double.parseDouble(resposta.getItems().get(2).getValue().toString());
-        SP = (Double.parseDouble(resposta.getItems().get(0).getValue().toString()))/16333*100;
-        PV = (Double.parseDouble(resposta.getItems().get(1).getValue().toString()))/16333*100;
-        MV = (Double.parseDouble(resposta.getItems().get(2).getValue().toString()))/16333*100;
+        SP = Double.parseDouble(resposta.getItems().get(0).getValue().toString());
+        PV = Double.parseDouble(resposta.getItems().get(1).getValue().toString());
+        MV = Double.parseDouble(resposta.getItems().get(2).getValue().toString());
         Modo = Double.parseDouble(resposta.getItems().get(3).getValue().toString());
+        
+        Double porcentSP = SP/16333*100;
+        Double porcentPV = PV/16333*100;
+        Double porcentMV = MV/16333*100;
 
         txtKpOut.setText(resposta.getItems().get(4).getValue().toString());
         txtKiOut.setText(resposta.getItems().get(5).getValue().toString());
         txtKdOut.setText(resposta.getItems().get(6).getValue().toString());
-        txtSPout.setText(truncar(SP));
-        txtPVout.setText(truncar(PV));
-        txtMVout.setText(truncar(MV));
-        //     txtSPout.setText(resposta.getItems().get(0).getValue().toString());
-        //     txtPVout.setText(resposta.getItems().get(1).getValue().toString());
-        //     txtMVout.setText(resposta.getItems().get(2).getValue().toString());
+        txtSPout.setText(truncar(porcentSP));
+        txtPVout.setText(truncar(porcentPV));
+        txtMVout.setText(truncar(porcentMV));
+        
         //Atualizar Gráfico
-        serieSP.addOrUpdate(new Millisecond(data), SP);
-        seriePV.addOrUpdate(new Millisecond(data), PV);
-        serieMV.addOrUpdate(new Millisecond(data), MV);
+        serieSP.addOrUpdate(new Millisecond(data), porcentSP);
+        seriePV.addOrUpdate(new Millisecond(data), porcentPV);
+        serieMV.addOrUpdate(new Millisecond(data), porcentMV);
         
         if(Modo > 0 ){
             btnModo.setBackground(Color.red);
@@ -177,6 +179,10 @@ public class OPCRead extends javax.swing.JFrame {
                 rele();
             } else {
                 pararRele();
+                ArrayList<Double> parametros = ModFOPDT(periodos, amp, eps, SP, y, u, Double.parseDouble(cbAmostragem.getSelectedItem().toString())/1000);
+                txt_K.setText(truncar(parametros.get(0)));
+                txt_Tau.setText(truncar(parametros.get(1)));
+                txt_D.setText(truncar(parametros.get(2)));
             }
         }
             
@@ -259,8 +265,10 @@ public class OPCRead extends javax.swing.JFrame {
         esperar((long) 20);
         k = 0;
         cont = 0;
+        y.clear();
+        u.clear();
         /*lê a posição atual do sinal de controle */
-        mvInicio = MV * 16383 / 100;
+        mvInicio = MV; // * 16383 / 100;
         /*Pegar a amplitude do relé e histerese*/
         amp = Double.parseDouble(txt_AmpRele.getText()) * 16383 / 100;
         eps = Double.parseDouble(txt_Eps.getText());
@@ -275,8 +283,6 @@ public class OPCRead extends javax.swing.JFrame {
         escrever(tagModo, 0);
         esperar((long) 20);
         flagRele = false;
-        y.clear();
-        u.clear();
         btn_ParaRele.setEnabled(false);
         btn_IniciarRele.setEnabled(true);
 
@@ -736,8 +742,12 @@ public class OPCRead extends javax.swing.JFrame {
         buttonGroup1.add(jRadioButton1);
         jRadioButton1.setText("PI");
 
+        txt_AmpRele.setText("0.04");
+
         buttonGroup1.add(jRadioButton2);
         jRadioButton2.setText("PID");
+
+        txt_Eps.setText("0.1");
 
         jLabel17.setText("Metodo");
 
