@@ -47,6 +47,8 @@ public class OPCRead extends javax.swing.JFrame {
     public ArrayList<Double> y=new ArrayList<>();
     public ArrayList<Double> u=new ArrayList<>();
     public double erro, eps, amp, mvInicio;
+    public String K, Tau, Theta;
+    public double numTau, numK, numTheta, Ti, Td;
     
     
 
@@ -180,9 +182,9 @@ public class OPCRead extends javax.swing.JFrame {
             } else {
                 pararRele();
                 ArrayList<Double> parametros = ModFOPDT(periodos, amp, eps, SP, y, u, Double.parseDouble(cbAmostragem.getSelectedItem().toString())/1000);
-                txt_K.setText(truncar(parametros.get(0)));
-                txt_Tau.setText(truncar(parametros.get(1)));
-                txt_D.setText(truncar(parametros.get(2)));
+                txt_K.setText(String.valueOf(parametros.get(0)));
+                txt_Tau.setText(String.valueOf(parametros.get(1)));
+                txt_Theta.setText(String.valueOf(parametros.get(2)));
             }
         }
             
@@ -393,6 +395,124 @@ public class OPCRead extends javax.swing.JFrame {
     }
 	
     
+    //funções de sintonia
+    public void zieglerNichols_PI() {
+
+        K = txt_K.getText();
+        Tau = txt_Tau.getText();
+        Theta = txt_Theta.getText();
+        numTau = Double.parseDouble(Tau);
+        numTheta = Double.parseDouble(Theta);
+        numK = Double.parseDouble(K);
+        double P = 0.9 * (numTau / numK * numTheta);
+        double I = 3.33 * numTheta;
+        double D = 0;
+        Ti = P / I;
+        txt_Kp.setText(String.valueOf(P));
+        txt_Ti.setText(String.valueOf(Ti));
+        txt_Td.setText(String.valueOf(D));
+
+    }
+
+    public void zieglerNichols_PID() {
+
+        K = txt_K.getText();
+        Tau = txt_Tau.getText();
+        Theta = txt_Theta.getText();
+        numTau = Double.parseDouble(Tau);
+        numTheta = Double.parseDouble(Theta);
+        numK = Double.parseDouble(K);
+        double P = 1.2 * (numTau / numK * numTheta);
+        double I = 2 * numTheta;
+        double D = 0.5 * numTheta;
+        Ti = P / I;
+        txt_Kp.setText(String.valueOf(P));
+        txt_Ti.setText(String.valueOf(Ti));
+        txt_Td.setText(String.valueOf(D));
+
+    }
+
+    public void CHR_PI() {
+        K = txt_K.getText();
+        Tau = txt_Tau.getText();
+        Theta = txt_Theta.getText();
+        double P = 0.6 * (numTau / numK * numTheta);
+        double I = 4 * numTheta;
+        double D = 0;
+        Ti = P / I;
+        txt_Kp.setText(String.valueOf(P));
+        txt_Ti.setText(String.valueOf(Ti));
+        txt_Td.setText(String.valueOf(D));
+    }
+
+    public void CHR_PID() {
+        K = txt_K.getText();
+        Tau = txt_Tau.getText();
+        Theta = txt_Theta.getText();
+        double P = 0.95 * (numTau / numK * numTheta);
+        double I = 2.375 * numTheta;
+        double D = 0.4210 * numTheta;
+        Ti = P / I;
+        txt_Kp.setText(String.valueOf(P));
+        txt_Ti.setText(String.valueOf(Ti));
+        txt_Td.setText(String.valueOf(D));
+
+    }
+
+    public void IAE_PI() {
+        K = txt_K.getText();
+        Tau = txt_Tau.getText();
+        Theta = txt_Theta.getText();
+        double P = (0.758 / numK) * (Math.pow((numTau / numTheta), (0.861)));
+        double I = numTau / (1.02 - (0.323 * (numTheta / numTau)));
+        double D = 0;
+        Ti = P / I;
+        txt_Kp.setText(String.valueOf(P));
+        txt_Ti.setText(String.valueOf(Ti));
+        txt_Td.setText(String.valueOf(D));
+    }
+
+    public void IAE_PID() {
+        K = txt_K.getText();
+        Tau = txt_Tau.getText();
+        Theta = txt_Theta.getText();
+        double P = (1.086 / numK) * (Math.pow((numTau / numTheta), (0.869)));
+        double I = numTau / (0.740 - (0.130 * (numTheta / numTau)));
+        double D = (0.348 * numTau) * (Math.pow((numTheta / numTau), (0.914)));
+        Ti = P / I;
+        txt_Kp.setText(String.valueOf(P));
+        txt_Ti.setText(String.valueOf(Ti));
+        txt_Td.setText(String.valueOf(D));
+    }
+
+    public void ITAE_PI() {
+        K = txt_K.getText();
+        Tau = txt_Tau.getText();
+        Theta = txt_Theta.getText();
+        double P = (0.586 / numK) * (Math.pow((numTau / numTheta), (0.916)));
+        double I = numTau / (1.03 - (0.165 * (numTheta / numTau)));
+        double D = 0;
+        Ti = P / I;
+        txt_Kp.setText(String.valueOf(P));
+        txt_Ti.setText(String.valueOf(Ti));
+        txt_Td.setText(String.valueOf(D));
+
+    }
+
+    public void ITAE_PID() {
+        K = txt_K.getText();
+        Tau = txt_Tau.getText();
+        Theta = txt_Theta.getText();
+        double P = (0.965 / numK) * (Math.pow((numTau / numTheta), (0.850)));
+        double I = numTau / (0.796 - (0.147 * (numTheta / numTau)));
+        double D = (0.308 * numTau) * (Math.pow((numTheta / numTau), (0.929)));
+        Ti = P / I;
+        txt_Kp.setText(String.valueOf(P));
+        txt_Ti.setText(String.valueOf(Ti));
+        txt_Td.setText(String.valueOf(D));
+
+    }
+    
     
 
     /**
@@ -440,9 +560,9 @@ public class OPCRead extends javax.swing.JFrame {
         panelGrafico = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
-        jRadioButton1 = new javax.swing.JRadioButton();
+        RadioPI = new javax.swing.JRadioButton();
         txt_AmpRele = new javax.swing.JTextField();
-        jRadioButton2 = new javax.swing.JRadioButton();
+        RadioPID = new javax.swing.JRadioButton();
         txt_Eps = new javax.swing.JTextField();
         jLabel17 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -456,7 +576,7 @@ public class OPCRead extends javax.swing.JFrame {
         jLabel16 = new javax.swing.JLabel();
         txt_Ti = new javax.swing.JTextField();
         btn_IniciarRele = new javax.swing.JButton();
-        txt_D = new javax.swing.JTextField();
+        txt_Theta = new javax.swing.JTextField();
         jLabel20 = new javax.swing.JLabel();
         btn_ParaRele = new javax.swing.JButton();
         txt_Td = new javax.swing.JTextField();
@@ -465,6 +585,7 @@ public class OPCRead extends javax.swing.JFrame {
         jLabel21 = new javax.swing.JLabel();
         jLabel22 = new javax.swing.JLabel();
         jLabel23 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -739,13 +860,13 @@ public class OPCRead extends javax.swing.JFrame {
 
         jLabel13.setText("Histerese Relé (eps)");
 
-        buttonGroup1.add(jRadioButton1);
-        jRadioButton1.setText("PI");
+        buttonGroup1.add(RadioPI);
+        RadioPI.setText("PI");
 
         txt_AmpRele.setText("0.04");
 
-        buttonGroup1.add(jRadioButton2);
-        jRadioButton2.setText("PID");
+        buttonGroup1.add(RadioPID);
+        RadioPID.setText("PID");
 
         txt_Eps.setText("0.1");
 
@@ -753,11 +874,20 @@ public class OPCRead extends javax.swing.JFrame {
 
         jLabel14.setText("K");
 
-        cbo_metodo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbo_metodo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "", "Zigler Nichols", "CHR", "IAE", "ITAE" }));
+        cbo_metodo.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbo_metodoItemStateChanged(evt);
+            }
+        });
+
+        txt_K.setColumns(5);
 
         jLabel18.setText("Kp");
 
         jLabel15.setText("Tau");
+
+        txt_Tau.setColumns(5);
 
         jLabel19.setText("Ti");
 
@@ -769,6 +899,8 @@ public class OPCRead extends javax.swing.JFrame {
                 btn_IniciarReleActionPerformed(evt);
             }
         });
+
+        txt_Theta.setColumns(5);
 
         jLabel20.setText("Td");
 
@@ -788,6 +920,13 @@ public class OPCRead extends javax.swing.JFrame {
         jLabel23.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel23.setText("SINTONIA");
 
+        jButton1.setText("ENVIAR PARA A PLANTA");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -797,71 +936,77 @@ public class OPCRead extends javax.swing.JFrame {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelGrafico, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator1)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 11, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jSeparator1)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(15, 15, 15)
-                                .addComponent(btn_IniciarRele)
-                                .addGap(111, 111, 111)
-                                .addComponent(btn_ParaRele))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                        .addComponent(jLabel14)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(txt_K))
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jLabel12)
-                                        .addComponent(jLabel13))
-                                    .addComponent(jRadioButton1))
+                                .addGap(0, 11, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addGap(60, 60, 60)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(txt_AmpRele)
-                                            .addComponent(txt_Eps, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGap(15, 15, 15)
+                                        .addComponent(btn_IniciarRele)
+                                        .addGap(111, 111, 111)
+                                        .addComponent(btn_ParaRele))
                                     .addGroup(layout.createSequentialGroup()
-                                        .addGap(53, 53, 53)
-                                        .addComponent(jRadioButton2))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jLabel15)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(txt_Tau, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jLabel16)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(txt_D, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                    .addComponent(jLabel18)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(txt_Kp, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(jLabel19)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(txt_Ti, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(jLabel20)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(txt_Td))
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                    .addComponent(jLabel17)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(cbo_metodo, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addContainerGap())
-                    .addComponent(jSeparator2)
-                    .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel23)
-                            .addComponent(jLabel22))
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                                .addComponent(jLabel14)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(txt_K))
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addComponent(jLabel12)
+                                                .addComponent(jLabel13))
+                                            .addComponent(RadioPI))
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGap(60, 60, 60)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                    .addComponent(txt_AmpRele)
+                                                    .addComponent(txt_Eps, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGap(53, 53, 53)
+                                                .addComponent(RadioPID))
+                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jLabel15)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(txt_Tau, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(jLabel16)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(txt_Theta, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                            .addComponent(jLabel17)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(cbo_metodo, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                            .addComponent(jLabel18)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                            .addComponent(txt_Kp, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(jLabel19)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(txt_Ti, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(jLabel20)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(txt_Td))))
+                                .addContainerGap())
+                            .addComponent(jSeparator2)
+                            .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(10, 10, 10)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel23)
+                                    .addComponent(jLabel22))
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -893,15 +1038,15 @@ public class OPCRead extends javax.swing.JFrame {
                     .addComponent(jLabel15)
                     .addComponent(txt_Tau, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel16)
-                    .addComponent(txt_D, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txt_Theta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(28, 28, 28)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel23)
                 .addGap(11, 11, 11)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jRadioButton1)
-                    .addComponent(jRadioButton2))
+                    .addComponent(RadioPI)
+                    .addComponent(RadioPID))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel17)
@@ -914,7 +1059,9 @@ public class OPCRead extends javax.swing.JFrame {
                     .addComponent(txt_Ti, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel20)
                     .addComponent(txt_Td, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -1007,6 +1154,46 @@ public class OPCRead extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtKdOutActionPerformed
 
+    private void cbo_metodoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbo_metodoItemStateChanged
+        //int Metodo = cbo_Metodo.getSelectedIndex();
+        //Sintonia PI&PID Zigler Nichols
+        switch (evt.getStateChange()){
+            case 1:
+            if (RadioPI.isSelected()) 
+                zieglerNichols_PI();
+            else if (RadioPID.isSelected()) 
+                zieglerNichols_PID();
+            break;
+            case 2:
+            if (RadioPI.isSelected()) 
+                CHR_PI();
+            else if (RadioPID.isSelected())
+                CHR_PID();
+            break;
+            case 3:
+            if (RadioPI.isSelected())
+                IAE_PI();
+            else if (RadioPID.isSelected())
+                IAE_PID();
+            break;        
+            //Sintonia PI&PID ITAE
+            case 4:
+            if (RadioPI.isSelected()) 
+                ITAE_PI();
+            else if (RadioPID.isSelected())
+                ITAE_PID();
+            break;
+            default:
+                System.out.println("Opção invalida");
+        }
+    }//GEN-LAST:event_cbo_metodoItemStateChanged
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        escrever(tagKp, Double.valueOf(txt_Kp.getText()));
+        escrever(tagKi, Double.valueOf(txt_Ti.getText()));
+        escrever(tagKd, Double.valueOf(txt_Td.getText()));
+    }//GEN-LAST:event_jButton1ActionPerformed
+    
     /**
      * @param args the command line arguments
      */
@@ -1052,6 +1239,8 @@ public class OPCRead extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField LabelStatus;
+    private javax.swing.JRadioButton RadioPI;
+    private javax.swing.JRadioButton RadioPID;
     private javax.swing.JButton btnConectar;
     private javax.swing.JButton btnIniciarLeitura;
     private javax.swing.JToggleButton btnModo;
@@ -1060,6 +1249,7 @@ public class OPCRead extends javax.swing.JFrame {
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<String> cbAmostragem;
     private javax.swing.JComboBox<String> cbo_metodo;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1087,8 +1277,6 @@ public class OPCRead extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JPanel panelGrafico;
@@ -1105,12 +1293,12 @@ public class OPCRead extends javax.swing.JFrame {
     private javax.swing.JTextField txtSPout;
     private javax.swing.JTextField txtServidor;
     private javax.swing.JTextField txt_AmpRele;
-    private javax.swing.JTextField txt_D;
     private javax.swing.JTextField txt_Eps;
     private javax.swing.JTextField txt_K;
     private javax.swing.JTextField txt_Kp;
     private javax.swing.JTextField txt_Tau;
     private javax.swing.JTextField txt_Td;
+    private javax.swing.JTextField txt_Theta;
     private javax.swing.JTextField txt_Ti;
     // End of variables declaration//GEN-END:variables
 }
