@@ -384,7 +384,7 @@
         </Component>
         <Component class="javax.swing.JTextField" name="txtServidor">
           <Properties>
-            <Property name="text" type="java.lang.String" value="ElipseSCADA.OPCSvr.1"/>
+            <Property name="text" type="java.lang.String" value="RSLinx Remote OPC Server"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtServidorActionPerformed"/>
@@ -455,7 +455,7 @@
         </Component>
         <Component class="javax.swing.JTextField" name="txtSP">
           <Properties>
-            <Property name="text" type="java.lang.String" value="TagSP"/>
+            <Property name="text" type="java.lang.String" value="[P_UNP]N7:19"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtSPActionPerformed"/>
@@ -463,17 +463,17 @@
         </Component>
         <Component class="javax.swing.JTextField" name="txtPV">
           <Properties>
-            <Property name="text" type="java.lang.String" value="TagPV"/>
+            <Property name="text" type="java.lang.String" value="[P_UNP]N7:59"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtMV">
           <Properties>
-            <Property name="text" type="java.lang.String" value="TagMV"/>
+            <Property name="text" type="java.lang.String" value="[P_UNP]N7:20"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtModo">
           <Properties>
-            <Property name="text" type="java.lang.String" value="TagModo"/>
+            <Property name="text" type="java.lang.String" value="[P_UNP]B19:0/2"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel8">
@@ -630,7 +630,7 @@
     </Component>
     <Component class="javax.swing.JTextField" name="txt_AmpRele">
       <Properties>
-        <Property name="text" type="java.lang.String" value="0.04"/>
+        <Property name="text" type="java.lang.String" value="10"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JRadioButton" name="RadioPID">
@@ -643,7 +643,7 @@
     </Component>
     <Component class="javax.swing.JTextField" name="txt_Eps">
       <Properties>
-        <Property name="text" type="java.lang.String" value="0.1"/>
+        <Property name="text" type="java.lang.String" value="0.3"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel17">
@@ -699,7 +699,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel19">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Ti"/>
+        <Property name="text" type="java.lang.String" value="Ki"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel16">
@@ -724,7 +724,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel20">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Td"/>
+        <Property name="text" type="java.lang.String" value="Kd"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="btn_ParaRele">

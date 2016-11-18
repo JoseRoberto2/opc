@@ -48,7 +48,7 @@ public class OPCRead extends javax.swing.JFrame {
     public ArrayList<Double> u=new ArrayList<>();
     public double erro, eps, amp, mvInicio;
     public String K, Tau, Theta;
-    public double numTau, numK, numTheta, Ti, Td;
+    public double numTau, numK, numTheta, Ti, Td, P, D;
     
     
 
@@ -89,12 +89,12 @@ public class OPCRead extends javax.swing.JFrame {
         tagPV = new OpcItem(txtPV.getText(), true, "");
         tagMV = new OpcItem(txtMV.getText(), true, "");
         tagModo = new OpcItem(txtModo.getText(), true, "");
-        tagKp=new OpcItem("tagKp", true, "");
-        tagKi=new OpcItem("tagKi", true, "");
-        tagKd=new OpcItem("tagKd", true, "");
-        //tagKp=new OpcItem("[P_UNP]N7:16", true, "");
-        //tagKi=new OpcItem("[P_UNP]N7:17", true, "");
-        //tagKd=new OpcItem("[P_UNP]N7:18", true, "");
+        //tagKp=new OpcItem("tagKp", true, "");
+        //tagKi=new OpcItem("tagKi", true, "");
+        //tagKd=new OpcItem("tagKd", true, "");
+        tagKp=new OpcItem("[P_UNP]N7:16", true, "");
+        tagKi=new OpcItem("[P_UNP]N7:17", true, "");
+        tagKd=new OpcItem("[P_UNP]N7:18", true, "");
 
         grupo = new OpcGroup("grupo1", true, 500, 0.0f);
 
@@ -156,9 +156,9 @@ public class OPCRead extends javax.swing.JFrame {
         Double porcentPV = PV/16333*100;
         Double porcentMV = MV/16333*100;
 
-        txtKpOut.setText(resposta.getItems().get(4).getValue().toString());
-        txtKiOut.setText(resposta.getItems().get(5).getValue().toString());
-        txtKdOut.setText(resposta.getItems().get(6).getValue().toString());
+        txtKpOut.setText(truncar(Double.parseDouble(resposta.getItems().get(4).getValue().toString()) / 100));
+        txtKiOut.setText(truncar(Double.parseDouble(resposta.getItems().get(5).getValue().toString()) / 100));
+        txtKdOut.setText(truncar(Double.parseDouble(resposta.getItems().get(6).getValue().toString()) / 100));
         txtSPout.setText(truncar(porcentSP));
         txtPVout.setText(truncar(porcentPV));
         txtMVout.setText(truncar(porcentMV));
@@ -182,9 +182,12 @@ public class OPCRead extends javax.swing.JFrame {
             } else {
                 pararRele();
                 ArrayList<Double> parametros = ModFOPDT(periodos, amp, eps, SP, y, u, Double.parseDouble(cbAmostragem.getSelectedItem().toString())/1000);
-                txt_K.setText(String.valueOf(parametros.get(0)));
-                txt_Tau.setText(String.valueOf(parametros.get(1)));
-                txt_Theta.setText(String.valueOf(parametros.get(2)));
+                K = String.valueOf(parametros.get(0));
+                Tau = String.valueOf(parametros.get(1));
+                Theta = String.valueOf(parametros.get(2));
+                txt_K.setText(truncar(parametros.get(0)));
+                txt_Tau.setText(truncar(parametros.get(1)));
+                txt_Theta.setText(truncar(parametros.get(2)));
             }
         }
             
@@ -398,118 +401,149 @@ public class OPCRead extends javax.swing.JFrame {
     //funções de sintonia
     public void zieglerNichols_PI() {
 
-        K = txt_K.getText();
+        /*K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();
+        Theta = txt_Theta.getText();*/
         numTau = Double.parseDouble(Tau);
         numTheta = Double.parseDouble(Theta);
         numK = Double.parseDouble(K);
-        double P = 0.9 * (numTau / numK * numTheta);
-        double I = 3.33 * numTheta;
-        double D = 0;
+        P = 0.9 * (numTau / numK * numTheta);
+        double I = 3.33 * numTheta / 60;
+        D = 0;
         Ti = P / I;
-        txt_Kp.setText(String.valueOf(P));
+        txt_Kp.setText(truncar(P));
+        txt_Ti.setText(truncar(Ti));
+        txt_Td.setText(truncar(D));
+        /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
-        txt_Td.setText(String.valueOf(D));
+        txt_Td.setText(String.valueOf(D));*/
 
     }
 
     public void zieglerNichols_PID() {
 
-        K = txt_K.getText();
+        /*K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();
+        Theta = txt_Theta.getText();*/
         numTau = Double.parseDouble(Tau);
         numTheta = Double.parseDouble(Theta);
         numK = Double.parseDouble(K);
-        double P = 1.2 * (numTau / numK * numTheta);
-        double I = 2 * numTheta;
-        double D = 0.5 * numTheta;
+        
+        System.out.println(numTheta);
+        P = 1.2 * (numTau / numK * numTheta);
+        double I = 2 * numTheta / 60;
+        D = 0.5 * numTheta / 60;
+        System.out.println(D);
         Ti = P / I;
-        txt_Kp.setText(String.valueOf(P));
+        D = P * D;
+        txt_Kp.setText(truncar(P));
+        txt_Ti.setText(truncar(Ti));
+        txt_Td.setText(truncar(D));
+        /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
-        txt_Td.setText(String.valueOf(D));
+        txt_Td.setText(String.valueOf(D));*/
 
     }
 
     public void CHR_PI() {
-        K = txt_K.getText();
+        /*K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();
-        double P = 0.6 * (numTau / numK * numTheta);
-        double I = 4 * numTheta;
-        double D = 0;
+        Theta = txt_Theta.getText();*/
+        P = 0.6 * (numTau / numK * numTheta);
+        double I = 4 * numTheta / 60;
+        D = 0;
         Ti = P / I;
-        txt_Kp.setText(String.valueOf(P));
+        txt_Kp.setText(truncar(P));
+        txt_Ti.setText(truncar(Ti));
+        txt_Td.setText(truncar(D));
+        /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
-        txt_Td.setText(String.valueOf(D));
+        txt_Td.setText(String.valueOf(D));*/
     }
 
     public void CHR_PID() {
-        K = txt_K.getText();
+        /*K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();
-        double P = 0.95 * (numTau / numK * numTheta);
-        double I = 2.375 * numTheta;
-        double D = 0.4210 * numTheta;
+        Theta = txt_Theta.getText();*/
+        P = 0.95 * (numTau / numK * numTheta);
+        double I = 2.375 * numTheta / 60;
+        D = 0.4210 * numTheta / 60;
         Ti = P / I;
-        txt_Kp.setText(String.valueOf(P));
+        D = P * D;
+        txt_Kp.setText(truncar(P));
+        txt_Ti.setText(truncar(Ti));
+        txt_Td.setText(truncar(D));
+        /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
-        txt_Td.setText(String.valueOf(D));
+        txt_Td.setText(String.valueOf(D));*/
 
     }
 
     public void IAE_PI() {
-        K = txt_K.getText();
+        /*K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();
-        double P = (0.758 / numK) * (Math.pow((numTau / numTheta), (0.861)));
-        double I = numTau / (1.02 - (0.323 * (numTheta / numTau)));
-        double D = 0;
+        Theta = txt_Theta.getText();*/
+        P = (0.758 / numK) * (Math.pow((numTau / numTheta), (0.861)));
+        double I = (numTau / (1.02 - (0.323 * (numTheta / numTau)))) / 60;
+        D = 0;
         Ti = P / I;
-        txt_Kp.setText(String.valueOf(P));
+        txt_Kp.setText(truncar(P));
+        txt_Ti.setText(truncar(Ti));
+        txt_Td.setText(truncar(D));
+        /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
-        txt_Td.setText(String.valueOf(D));
+        txt_Td.setText(String.valueOf(D));*/
     }
 
     public void IAE_PID() {
-        K = txt_K.getText();
+        /*K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();
-        double P = (1.086 / numK) * (Math.pow((numTau / numTheta), (0.869)));
-        double I = numTau / (0.740 - (0.130 * (numTheta / numTau)));
-        double D = (0.348 * numTau) * (Math.pow((numTheta / numTau), (0.914)));
+        Theta = txt_Theta.getText();*/
+        P = (1.086 / numK) * (Math.pow((numTau / numTheta), (0.869)));
+        double I = (numTau / (0.740 - (0.130 * (numTheta / numTau)))) / 60;
+        D = ((0.348 * numTau) * (Math.pow((numTheta / numTau), (0.914)))) / 60;
         Ti = P / I;
-        txt_Kp.setText(String.valueOf(P));
+        D = P * D;
+        txt_Kp.setText(truncar(P));
+        txt_Ti.setText(truncar(Ti));
+        txt_Td.setText(truncar(D));
+        /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
-        txt_Td.setText(String.valueOf(D));
+        txt_Td.setText(String.valueOf(D));*/
     }
 
     public void ITAE_PI() {
-        K = txt_K.getText();
+        /*K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();
-        double P = (0.586 / numK) * (Math.pow((numTau / numTheta), (0.916)));
-        double I = numTau / (1.03 - (0.165 * (numTheta / numTau)));
-        double D = 0;
+        Theta = txt_Theta.getText();*/
+        P = (0.586 / numK) * (Math.pow((numTau / numTheta), (0.916)));
+        double I = (numTau / (1.03 - (0.165 * (numTheta / numTau)))) / 60;
+        D = 0;
         Ti = P / I;
-        txt_Kp.setText(String.valueOf(P));
+        txt_Kp.setText(truncar(P));
+        txt_Ti.setText(truncar(Ti));
+        txt_Td.setText(truncar(D));
+        /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
-        txt_Td.setText(String.valueOf(D));
+        txt_Td.setText(String.valueOf(D));*/
 
     }
 
     public void ITAE_PID() {
-        K = txt_K.getText();
+        /*K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();
-        double P = (0.965 / numK) * (Math.pow((numTau / numTheta), (0.850)));
-        double I = numTau / (0.796 - (0.147 * (numTheta / numTau)));
-        double D = (0.308 * numTau) * (Math.pow((numTheta / numTau), (0.929)));
+        Theta = txt_Theta.getText();*/
+        P = (0.965 / numK) * (Math.pow((numTau / numTheta), (0.850)));
+        double I = (numTau / (0.796 - (0.147 * (numTheta / numTau)))) / 60;
+        D = ((0.308 * numTau) * (Math.pow((numTheta / numTau), (0.929)))) / 60;
         Ti = P / I;
-        txt_Kp.setText(String.valueOf(P));
+        D = P * D;
+        txt_Kp.setText(truncar(P));
+        txt_Ti.setText(truncar(Ti));
+        txt_Td.setText(truncar(D));
+        /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
-        txt_Td.setText(String.valueOf(D));
+        txt_Td.setText(String.valueOf(D));*/
 
     }
     
@@ -594,7 +628,7 @@ public class OPCRead extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel1.setText("Servidor OPC :");
 
-        txtServidor.setText("ElipseSCADA.OPCSvr.1");
+        txtServidor.setText("RSLinx Remote OPC Server");
         txtServidor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtServidorActionPerformed(evt);
@@ -633,18 +667,18 @@ public class OPCRead extends javax.swing.JFrame {
 
         jLabel7.setText("Tag Modo:");
 
-        txtSP.setText("TagSP");
+        txtSP.setText("[P_UNP]N7:19");
         txtSP.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtSPActionPerformed(evt);
             }
         });
 
-        txtPV.setText("TagPV");
+        txtPV.setText("[P_UNP]N7:59");
 
-        txtMV.setText("TagMV");
+        txtMV.setText("[P_UNP]N7:20");
 
-        txtModo.setText("TagModo");
+        txtModo.setText("[P_UNP]B19:0/2");
 
         jLabel8.setText("Tempo de Amostragem :");
 
@@ -863,12 +897,12 @@ public class OPCRead extends javax.swing.JFrame {
         buttonGroup1.add(RadioPI);
         RadioPI.setText("PI");
 
-        txt_AmpRele.setText("0.04");
+        txt_AmpRele.setText("10");
 
         buttonGroup1.add(RadioPID);
         RadioPID.setText("PID");
 
-        txt_Eps.setText("0.1");
+        txt_Eps.setText("0.3");
 
         jLabel17.setText("Metodo");
 
@@ -889,7 +923,7 @@ public class OPCRead extends javax.swing.JFrame {
 
         txt_Tau.setColumns(5);
 
-        jLabel19.setText("Ti");
+        jLabel19.setText("Ki");
 
         jLabel16.setText("D");
 
@@ -902,7 +936,7 @@ public class OPCRead extends javax.swing.JFrame {
 
         txt_Theta.setColumns(5);
 
-        jLabel20.setText("Td");
+        jLabel20.setText("Kd");
 
         btn_ParaRele.setText("parar");
         btn_ParaRele.addActionListener(new java.awt.event.ActionListener() {
@@ -1157,21 +1191,30 @@ public class OPCRead extends javax.swing.JFrame {
     private void cbo_metodoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbo_metodoItemStateChanged
         //int Metodo = cbo_Metodo.getSelectedIndex();
         //Sintonia PI&PID Zigler Nichols
-        switch (evt.getStateChange()){
+        switch (cbo_metodo.getSelectedIndex()){
             case 1:
-            if (RadioPI.isSelected()) 
+            if (RadioPI.isSelected())  {
                 zieglerNichols_PI();
-            else if (RadioPID.isSelected()) 
+                System.out.println("1");
+            }
+                
+            else if (RadioPID.isSelected()) {
                 zieglerNichols_PID();
+                System.out.println("2");
+            }
             break;
             case 2:
-            if (RadioPI.isSelected()) 
+            if (RadioPI.isSelected()) {
                 CHR_PI();
-            else if (RadioPID.isSelected())
+                System.out.println("3");
+            }
+            else if (RadioPID.isSelected()) {
                 CHR_PID();
+                System.out.println("4");
+            }
             break;
             case 3:
-            if (RadioPI.isSelected())
+            if (RadioPI.isSelected()) 
                 IAE_PI();
             else if (RadioPID.isSelected())
                 IAE_PID();
@@ -1189,9 +1232,11 @@ public class OPCRead extends javax.swing.JFrame {
     }//GEN-LAST:event_cbo_metodoItemStateChanged
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        escrever(tagKp, Double.valueOf(txt_Kp.getText()));
-        escrever(tagKi, Double.valueOf(txt_Ti.getText()));
-        escrever(tagKd, Double.valueOf(txt_Td.getText()));
+        if (P != 0 && Ti != 0) {
+            escrever(tagKp, P * 100);
+            escrever(tagKi, Ti * 100);
+            escrever(tagKd, D * 100);
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
     
     /**
