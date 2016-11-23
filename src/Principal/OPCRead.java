@@ -48,7 +48,7 @@ public class OPCRead extends javax.swing.JFrame {
     public ArrayList<Double> u=new ArrayList<>();
     public double erro, eps, amp, mvInicio;
     public String K, Tau, Theta;
-    public double numTau, numK, numTheta, Ti, Td, P, D;
+    public double numTau, numK, numTheta, Ki, Td, KP, KD;
     
     
 
@@ -147,14 +147,14 @@ public class OPCRead extends javax.swing.JFrame {
         //SP = Double.parseDouble(resposta.getItems().get(0).getValue().toString());
         //PV = Double.parseDouble(resposta.getItems().get(1).getValue().toString());
         //MV = Double.parseDouble(resposta.getItems().get(2).getValue().toString());
-        SP = Double.parseDouble(resposta.getItems().get(0).getValue().toString());
-        PV = Double.parseDouble(resposta.getItems().get(1).getValue().toString());
-        MV = Double.parseDouble(resposta.getItems().get(2).getValue().toString());
+        SP = Double.parseDouble(resposta.getItems().get(0).getValue().toString())/16333*100;
+        PV = Double.parseDouble(resposta.getItems().get(1).getValue().toString())/16333*100;
+        MV = Double.parseDouble(resposta.getItems().get(2).getValue().toString())/16333*100;
         Modo = Double.parseDouble(resposta.getItems().get(3).getValue().toString());
         
-        Double porcentSP = SP/16333*100;
-        Double porcentPV = PV/16333*100;
-        Double porcentMV = MV/16333*100;
+        Double porcentSP = SP;
+        Double porcentPV = PV;
+        Double porcentMV = MV;
 
         txtKpOut.setText(truncar(Double.parseDouble(resposta.getItems().get(4).getValue().toString()) / 100));
         txtKiOut.setText(truncar(Double.parseDouble(resposta.getItems().get(5).getValue().toString()) / 100));
@@ -181,13 +181,16 @@ public class OPCRead extends javax.swing.JFrame {
                 rele();
             } else {
                 pararRele();
-                ArrayList<Double> parametros = ModFOPDT(periodos, amp, eps, SP, y, u, Double.parseDouble(cbAmostragem.getSelectedItem().toString())/1000);
+                ArrayList<Double> parametros = ModFOPDT(periodos, Double.parseDouble(txt_AmpRele.getText()), Double.parseDouble(txt_Eps.getText()), SP, y, u, Double.parseDouble(cbAmostragem.getSelectedItem().toString())/1000);
                 K = String.valueOf(parametros.get(0));
                 Tau = String.valueOf(parametros.get(1));
                 Theta = String.valueOf(parametros.get(2));
-                txt_K.setText(truncar(parametros.get(0)));
-                txt_Tau.setText(truncar(parametros.get(1)));
-                txt_Theta.setText(truncar(parametros.get(2)));
+                txt_K.setText(K);
+                txt_Tau.setText(Tau);
+                txt_Theta.setText(Theta);
+//                txt_K.setText(truncar(parametros.get(0)));
+//                txt_Tau.setText(truncar(parametros.get(1)));
+//                txt_Theta.setText(truncar(parametros.get(2)));
             }
         }
             
@@ -223,8 +226,8 @@ public class OPCRead extends javax.swing.JFrame {
 
     public static String truncar(double valor) {
         DecimalFormat df = new DecimalFormat("#.00");
-        return df.format(valor);
-
+        
+        return String.valueOf(df.format(valor)).replace(',', '.');
     }
 
     public void escrever(OpcItem tag, double valor) {
@@ -234,7 +237,6 @@ public class OPCRead extends javax.swing.JFrame {
         } catch (ComponentNotFoundException | SynchWriteException ex) {
             Logger.getLogger(OPCRead.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
     
     public void rele(){
@@ -273,7 +275,7 @@ public class OPCRead extends javax.swing.JFrame {
         y.clear();
         u.clear();
         /*lê a posição atual do sinal de controle */
-        mvInicio = MV; // * 16383 / 100;
+        mvInicio = MV * 16383 / 100;
         /*Pegar a amplitude do relé e histerese*/
         amp = Double.parseDouble(txt_AmpRele.getText()) * 16383 / 100;
         eps = Double.parseDouble(txt_Eps.getText());
@@ -401,19 +403,19 @@ public class OPCRead extends javax.swing.JFrame {
     //funções de sintonia
     public void zieglerNichols_PI() {
 
-        /*K = txt_K.getText();
+        K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();*/
+        Theta = txt_Theta.getText();
         numTau = Double.parseDouble(Tau);
         numTheta = Double.parseDouble(Theta);
         numK = Double.parseDouble(K);
-        P = 0.9 * (numTau / numK * numTheta);
-        double I = 3.33 * numTheta / 60;
-        D = 0;
-        Ti = P / I;
-        txt_Kp.setText(truncar(P));
-        txt_Ti.setText(truncar(Ti));
-        txt_Td.setText(truncar(D));
+        KP = 0.9 * (numTau / (numK * numTheta));
+        double TI = (3.33 * numTheta) ;
+        KD = 0;
+        Ki = KP / TI;
+        txt_Kp.setText(truncar(KP));
+        txt_Ti.setText(truncar(Ki));
+        txt_Td.setText(truncar(KD));
         /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
         txt_Td.setText(String.valueOf(D));*/
@@ -422,23 +424,22 @@ public class OPCRead extends javax.swing.JFrame {
 
     public void zieglerNichols_PID() {
 
-        /*K = txt_K.getText();
+        K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();*/
+        Theta = txt_Theta.getText();
         numTau = Double.parseDouble(Tau);
         numTheta = Double.parseDouble(Theta);
         numK = Double.parseDouble(K);
         
         System.out.println(numTheta);
-        P = 1.2 * (numTau / numK * numTheta);
-        double I = 2 * numTheta / 60;
-        D = 0.5 * numTheta / 60;
-        System.out.println(D);
-        Ti = P / I;
-        D = P * D;
-        txt_Kp.setText(truncar(P));
-        txt_Ti.setText(truncar(Ti));
-        txt_Td.setText(truncar(D));
+        KP = 1.2 * (numTau / (numK * numTheta));
+        double TI = 2 * numTheta ;
+        Td = (0.5 * numTheta)/60;
+        Ki = KP / TI;
+        KD = KP * Td;
+        txt_Kp.setText(truncar(KP));
+        txt_Ti.setText(truncar(Ki));
+        txt_Td.setText(truncar(KD));
         /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
         txt_Td.setText(String.valueOf(D));*/
@@ -446,33 +447,33 @@ public class OPCRead extends javax.swing.JFrame {
     }
 
     public void CHR_PI() {
-        /*K = txt_K.getText();
+        K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();*/
-        P = 0.6 * (numTau / numK * numTheta);
-        double I = 4 * numTheta / 60;
-        D = 0;
-        Ti = P / I;
-        txt_Kp.setText(truncar(P));
-        txt_Ti.setText(truncar(Ti));
-        txt_Td.setText(truncar(D));
+        Theta = txt_Theta.getText();
+        KP = 0.6 * (numTau / (numK * numTheta));
+        double Ti = 4 * numTheta;
+        KD = 0;
+        Ki = KP / Ti;
+        txt_Kp.setText(truncar(KP));
+        txt_Ti.setText(truncar(Ki));
+        txt_Td.setText(truncar(KD));
         /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
         txt_Td.setText(String.valueOf(D));*/
     }
 
     public void CHR_PID() {
-        /*K = txt_K.getText();
+        K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();*/
-        P = 0.95 * (numTau / numK * numTheta);
-        double I = 2.375 * numTheta / 60;
-        D = 0.4210 * numTheta / 60;
-        Ti = P / I;
-        D = P * D;
-        txt_Kp.setText(truncar(P));
-        txt_Ti.setText(truncar(Ti));
-        txt_Td.setText(truncar(D));
+        Theta = txt_Theta.getText();
+        KP = 0.95 * (numTau / (numK * numTheta));
+        double TI = 2.375 * numTheta ;
+        Td = (0.4210 * numTheta)/60;
+        Ki = KP / TI;
+        KD = KP * Td;
+        txt_Kp.setText(truncar(KP));
+        txt_Ti.setText(truncar(Ki));
+        txt_Td.setText(truncar(KD));
         /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
         txt_Td.setText(String.valueOf(D));*/
@@ -480,49 +481,49 @@ public class OPCRead extends javax.swing.JFrame {
     }
 
     public void IAE_PI() {
-        /*K = txt_K.getText();
+        K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();*/
-        P = (0.758 / numK) * (Math.pow((numTau / numTheta), (0.861)));
-        double I = (numTau / (1.02 - (0.323 * (numTheta / numTau)))) / 60;
-        D = 0;
-        Ti = P / I;
-        txt_Kp.setText(truncar(P));
-        txt_Ti.setText(truncar(Ti));
-        txt_Td.setText(truncar(D));
+        Theta = txt_Theta.getText();
+        KP = (0.758 / numK) * (Math.pow((numTau / numTheta), (0.861)));
+        double TI = (numTau / (1.02 - (0.323 * (numTheta / numTau))));
+        KD = 0;
+        Ki = KP / TI;
+        txt_Kp.setText(truncar(KP));
+        txt_Ti.setText(truncar(Ki));
+        txt_Td.setText(truncar(KD));
         /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
         txt_Td.setText(String.valueOf(D));*/
     }
 
     public void IAE_PID() {
-        /*K = txt_K.getText();
+        K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();*/
-        P = (1.086 / numK) * (Math.pow((numTau / numTheta), (0.869)));
-        double I = (numTau / (0.740 - (0.130 * (numTheta / numTau)))) / 60;
-        D = ((0.348 * numTau) * (Math.pow((numTheta / numTau), (0.914)))) / 60;
-        Ti = P / I;
-        D = P * D;
-        txt_Kp.setText(truncar(P));
-        txt_Ti.setText(truncar(Ti));
-        txt_Td.setText(truncar(D));
+        Theta = txt_Theta.getText();
+        KP = (1.086 / numK) * (Math.pow((numTau / numTheta), (0.869)));
+        double I = (numTau / (0.740 - (0.130 * (numTheta / numTau)))) ;
+        Td = ((0.348 * numTau) * (Math.pow((numTheta / numTau), (0.914))))/60;
+        Ki = KP / I;
+        KD = KP * Td;
+        txt_Kp.setText(truncar(KP));
+        txt_Ti.setText(truncar(Ki));
+        txt_Td.setText(truncar(KD));
         /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
         txt_Td.setText(String.valueOf(D));*/
     }
 
     public void ITAE_PI() {
-        /*K = txt_K.getText();
+        K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();*/
-        P = (0.586 / numK) * (Math.pow((numTau / numTheta), (0.916)));
-        double I = (numTau / (1.03 - (0.165 * (numTheta / numTau)))) / 60;
-        D = 0;
-        Ti = P / I;
-        txt_Kp.setText(truncar(P));
-        txt_Ti.setText(truncar(Ti));
-        txt_Td.setText(truncar(D));
+        Theta = txt_Theta.getText();
+        KP = (0.586 / numK) * (Math.pow((numTau / numTheta), (0.916)));
+        double TI = (numTau / (1.03 - (0.165 * (numTheta / numTau))));
+        KD = 0;
+        Ki = KP / TI;
+        txt_Kp.setText(truncar(KP));
+        txt_Ti.setText(truncar(Ki));
+        txt_Td.setText(truncar(KD));
         /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
         txt_Td.setText(String.valueOf(D));*/
@@ -530,17 +531,17 @@ public class OPCRead extends javax.swing.JFrame {
     }
 
     public void ITAE_PID() {
-        /*K = txt_K.getText();
+        K = txt_K.getText();
         Tau = txt_Tau.getText();
-        Theta = txt_Theta.getText();*/
-        P = (0.965 / numK) * (Math.pow((numTau / numTheta), (0.850)));
-        double I = (numTau / (0.796 - (0.147 * (numTheta / numTau)))) / 60;
-        D = ((0.308 * numTau) * (Math.pow((numTheta / numTau), (0.929)))) / 60;
-        Ti = P / I;
-        D = P * D;
-        txt_Kp.setText(truncar(P));
-        txt_Ti.setText(truncar(Ti));
-        txt_Td.setText(truncar(D));
+        Theta = txt_Theta.getText();
+        KP = (0.965 / numK) * (Math.pow((numTau / numTheta), (0.850)));
+        double TI = (numTau / (0.796 - (0.147 * (numTheta / numTau))));
+        Td = ((0.308 * numTau) * (Math.pow((numTheta / numTau), (0.929))))/60;
+        Ki = KP / TI;
+        KD = KP * Td;
+        txt_Kp.setText(truncar(KP));
+        txt_Ti.setText(truncar(Ki));
+        txt_Td.setText(truncar(KD));
         /*txt_Kp.setText(String.valueOf(P));
         txt_Ti.setText(String.valueOf(Ti));
         txt_Td.setText(String.valueOf(D));*/
@@ -620,6 +621,10 @@ public class OPCRead extends javax.swing.JFrame {
         jLabel22 = new javax.swing.JLabel();
         jLabel23 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        txt_outSP = new javax.swing.JTextField();
+        jLabel27 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
+        jSeparator3 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -874,7 +879,7 @@ public class OPCRead extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel26)
                             .addComponent(txtKdOut, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(26, Short.MAX_VALUE))
+                .addContainerGap(28, Short.MAX_VALUE))
         );
 
         panelGrafico.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -883,11 +888,11 @@ public class OPCRead extends javax.swing.JFrame {
         panelGrafico.setLayout(panelGraficoLayout);
         panelGraficoLayout.setHorizontalGroup(
             panelGraficoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 411, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
         panelGraficoLayout.setVerticalGroup(
             panelGraficoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 517, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
 
         jLabel12.setText("Amplitude Relé (h)");
@@ -920,6 +925,12 @@ public class OPCRead extends javax.swing.JFrame {
         jLabel18.setText("Kp");
 
         jLabel15.setText("Tau");
+
+        txt_Kp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_KpActionPerformed(evt);
+            }
+        });
 
         txt_Tau.setColumns(5);
 
@@ -954,10 +965,19 @@ public class OPCRead extends javax.swing.JFrame {
         jLabel23.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel23.setText("SINTONIA");
 
-        jButton1.setText("ENVIAR PARA A PLANTA");
+        jButton1.setText("SINTONIZAR");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
+            }
+        });
+
+        jLabel27.setText("SP:");
+
+        jButton2.setText("ENVIAR SP");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
             }
         });
 
@@ -969,78 +989,87 @@ public class OPCRead extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(panelGrafico, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(panelGrafico, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSeparator1)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(0, 11, Short.MAX_VALUE)
+                                .addGap(18, 18, 18)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addGap(15, 15, 15)
-                                        .addComponent(btn_IniciarRele)
-                                        .addGap(111, 111, 111)
-                                        .addComponent(btn_ParaRele))
+                                        .addComponent(jLabel27)
+                                        .addGap(28, 28, 28)
+                                        .addComponent(txt_outSP, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(28, 28, 28)
+                                        .addComponent(jButton2))
                                     .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                                .addComponent(jLabel14)
-                                                .addGap(18, 18, 18)
-                                                .addComponent(txt_K))
-                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel18)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(txt_Kp, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel19)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(txt_Ti, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel20))
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                                 .addComponent(jLabel12)
-                                                .addComponent(jLabel13))
-                                            .addComponent(RadioPI))
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addComponent(jLabel13)
+                                                .addComponent(RadioPI)
+                                                .addGroup(layout.createSequentialGroup()
+                                                    .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                    .addComponent(txt_K, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addGroup(layout.createSequentialGroup()
+                                                    .addGap(60, 60, 60)
+                                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(txt_AmpRele)
+                                                        .addComponent(txt_Eps, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                .addGroup(layout.createSequentialGroup()
+                                                    .addGap(53, 53, 53)
+                                                    .addComponent(RadioPID))
+                                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                    .addComponent(jLabel15)
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                    .addComponent(txt_Tau, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                    .addComponent(jLabel16)
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                    .addComponent(txt_Theta, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addGroup(layout.createSequentialGroup()
-                                                .addGap(60, 60, 60)
-                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                                    .addComponent(txt_AmpRele)
-                                                    .addComponent(txt_Eps, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                .addGap(15, 15, 15)
+                                                .addComponent(btn_IniciarRele)
+                                                .addGap(111, 111, 111)
+                                                .addComponent(btn_ParaRele))
                                             .addGroup(layout.createSequentialGroup()
-                                                .addGap(53, 53, 53)
-                                                .addComponent(RadioPID))
-                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jLabel15)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(txt_Tau, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(jLabel16)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(txt_Theta, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                            .addComponent(jLabel17)
-                                            .addGap(18, 18, 18)
-                                            .addComponent(cbo_metodo, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                            .addComponent(jLabel18)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                            .addComponent(txt_Kp, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(jLabel19)
-                                            .addGap(18, 18, 18)
-                                            .addComponent(txt_Ti, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(jLabel20)
-                                            .addGap(18, 18, 18)
-                                            .addComponent(txt_Td))))
-                                .addContainerGap())
-                            .addComponent(jSeparator2)
-                            .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(jLabel17)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(cbo_metodo, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addComponent(txt_Td, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(10, 10, 10)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel23)
-                                    .addComponent(jLabel22))
-                                .addGap(0, 0, Short.MAX_VALUE))))
+                                .addGap(28, 28, 28)
+                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel23)
+                            .addComponent(jLabel22))
+                        .addGap(0, 820, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())))
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel21, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 314, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 318, javax.swing.GroupLayout.PREFERRED_SIZE)))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1049,7 +1078,7 @@ public class OPCRead extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel21)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btn_IniciarRele)
                     .addComponent(btn_ParaRele))
@@ -1073,19 +1102,19 @@ public class OPCRead extends javax.swing.JFrame {
                     .addComponent(txt_Tau, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel16)
                     .addComponent(txt_Theta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(28, 28, 28)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel23)
-                .addGap(11, 11, 11)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(RadioPI)
                     .addComponent(RadioPID))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel17)
                     .addComponent(cbo_metodo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(42, 42, 42)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel18)
                     .addComponent(txt_Kp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1093,8 +1122,15 @@ public class OPCRead extends javax.swing.JFrame {
                     .addComponent(txt_Ti, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel20)
                     .addComponent(txt_Td, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator3)
+                .addGap(3, 3, 3)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txt_outSP, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel27)
+                    .addComponent(jButton2))
                 .addContainerGap())
         );
 
@@ -1192,7 +1228,7 @@ public class OPCRead extends javax.swing.JFrame {
         //int Metodo = cbo_Metodo.getSelectedIndex();
         //Sintonia PI&PID Zigler Nichols
         switch (cbo_metodo.getSelectedIndex()){
-            case 1:
+            case 1://SELECIONA O METODO ZIEGLER NICHOLS
             if (RadioPI.isSelected())  {
                 zieglerNichols_PI();
                 System.out.println("1");
@@ -1232,12 +1268,23 @@ public class OPCRead extends javax.swing.JFrame {
     }//GEN-LAST:event_cbo_metodoItemStateChanged
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        if (P != 0 && Ti != 0) {
-            escrever(tagKp, P * 100);
-            escrever(tagKi, Ti * 100);
-            escrever(tagKd, D * 100);
-        }
+            KP = Double.parseDouble(txt_Kp.getText());
+            Ki = Double.parseDouble(txt_Ti.getText());
+            KD = Double.parseDouble(txt_Td.getText());
+            escrever(tagKp, KP * 100);
+            escrever(tagKi, (Ki/60) * 100);
+            escrever(tagKd, KD * 100);
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        if(Double.parseDouble(txt_outSP.getText()) > 0){
+            escrever(tagSP, Double.parseDouble(txt_outSP.getText()) * 16383 / 100);
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void txt_KpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_KpActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txt_KpActionPerformed
     
     /**
      * @param args the command line arguments
@@ -1295,6 +1342,7 @@ public class OPCRead extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cbAmostragem;
     private javax.swing.JComboBox<String> cbo_metodo;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1314,6 +1362,7 @@ public class OPCRead extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
+    private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1324,6 +1373,7 @@ public class OPCRead extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JSeparator jSeparator3;
     private javax.swing.JPanel panelGrafico;
     private javax.swing.JTextField txtHost;
     private javax.swing.JTextField txtKdOut;
@@ -1345,5 +1395,6 @@ public class OPCRead extends javax.swing.JFrame {
     private javax.swing.JTextField txt_Td;
     private javax.swing.JTextField txt_Theta;
     private javax.swing.JTextField txt_Ti;
+    private javax.swing.JTextField txt_outSP;
     // End of variables declaration//GEN-END:variables
 }
